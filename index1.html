@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>Starlight 7 — Module 1 Revision</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #0a0a1a; min-height: 100vh; padding: 20px; color: #ffffff; }
+        .main-container { max-width: 1200px; margin: 0 auto; }
+        .main-title { text-align: center; font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; letter-spacing: -1px; }
+        .main-subtitle { text-align: center; color: #a0aec0; font-size: 1.1rem; font-weight: 400; margin-bottom: 30px; letter-spacing: 2px; }
+        
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .modules-grid.hidden { display: none; }
+        
+        .module-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 24px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; border: 1px solid rgba(255,255,255,0.08); transform: translateY(0); }
+        .module-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        
+        .module-card-image { height: 140px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: linear-gradient(135deg, #1a1a3e, #2d1b69, #4a1a6b); }
+        .module-card-icon img { width: 72px; height: 72px; object-fit: contain; z-index: 1; filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5)); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+        .module-card:hover .module-card-icon img { transform: scale(1.15) rotate(-6deg); }
+        
+        .module-card-body { padding: 20px 18px 24px; text-align: center; }
+        .module-card-title { font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+        .module-card-subtitle { font-size: 0.8rem; color: #a0aec0; margin-bottom: 14px; }
+        
+        .module-card-btn { display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; border: none; border-radius: 50px; font-size: 1rem; font-weight: 800; font-family: 'Inter', sans-serif; cursor: pointer; text-transform: uppercase; letter-spacing: 0.8px; transition: all 0.3s; box-shadow: 0 8px 30px rgba(238,90,36,0.4); position: relative; }
+        .module-card:hover .module-card-btn { transform: translateY(-6px) scale(1.06); box-shadow: 0 16px 50px rgba(238,90,36,0.6); }
+
+        .test-mode { display: none; max-width: 750px; margin: 0 auto; }
+        .test-mode.active { display: block; }
+        
+        .back-btn { display: inline-block; padding: 12px 28px; background: rgba(255,255,255,0.08); color: #ffffff; border: 1px solid rgba(255,255,255,0.15); border-radius: 50px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 18px; margin-right: 10px; }
+        .back-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .share-btn { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #48dbfb, #0abde3); color: white; border: none; border-radius: 50px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-bottom: 18px; box-shadow: 0 4px 20px rgba(10,189,227,0.3); }
+        .share-btn:hover { transform: translateY(-2px) scale(1.03); }
+
+        .test-container { background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); border-radius: 24px; padding: 28px 24px 32px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+        .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .test-title { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #ff6b6b, #feca57); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .question-counter { background: rgba(255,255,255,0.08); padding: 6px 18px; border-radius: 50px; font-weight: 600; color: #cbd5e0; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.06); }
+        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb); border-radius: 10px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+        
+        .question-type-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
+        .badge-option { background: rgba(72,219,251,0.15); color: #48dbfb; border: 1px solid rgba(72,219,251,0.3); }
+        .badge-input { background: rgba(254,202,87,0.15); color: #feca57; border: 1px solid rgba(254,202,87,0.3); }
+        
+        .question-text { font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 20px; line-height: 1.6; min-height: 45px; white-space: pre-line; }
+        
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .option-btn { display: block; width: 100%; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08); border-radius: 14px; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.25s; color: #e2e8f0; font-weight: 500; font-family: 'Inter', sans-serif; }
+        .option-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateX(4px); }
+        .option-btn.correct { background: rgba(46,213,115,0.2); border-color: #2ed573; color: #2ed573; font-weight: 600; }
+        .option-btn.wrong { background: rgba(255,71,87,0.2); border-color: #ff4757; color: #ff4757; font-weight: 600; }
+        .option-btn.disabled { pointer-events: none; }
+
+        .input-area { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .input-area input { padding: 16px 20px; background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08); border-radius: 14px; font-size: 1rem; font-family: 'Inter', sans-serif; color: #ffffff; transition: all 0.25s ease; width: 100%; outline: none; }
+        .input-area input:focus { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+        .input-area input.correct-input { border-color: #2ed573; background: rgba(46,213,115,0.1); }
+        .input-area input.wrong-input { border-color: #ff4757; background: rgba(255,71,87,0.1); }
+        .check-btn { padding: 14px 32px; background: linear-gradient(135deg, #feca57, #f9ca24); color: #1a1a2e; border: none; border-radius: 50px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; align-self: flex-start; box-shadow: 0 4px 20px rgba(249,202,36,0.3); }
+        .input-feedback { font-size: 0.95rem; font-weight: 600; min-height: 28px; }
+        .input-feedback.correct-feedback { color: #2ed573; }
+        .input-feedback.wrong-feedback { color: #ff4757; }
+
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-btn { padding: 12px 28px; border: none; border-radius: 50px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-prev { background: rgba(255,255,255,0.06); color: #cbd5e0; border: 1px solid rgba(255,255,255,0.06); }
+        .btn-next { background: linear-gradient(135deg, #48dbfb, #0abde3); color: white; box-shadow: 0 4px 20px rgba(10,189,227,0.3); }
+        .score-display { text-align: center; font-weight: 700; color: #feca57; font-size: 0.95rem; background: rgba(255,255,255,0.04); padding: 8px 24px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.06); display: inline-block; }
+        .footer { text-align: center; color: #4a5568; margin-top: 40px; font-size: 0.8rem; letter-spacing: 1px; }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .main-title { font-size: 2rem; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .test-container { padding: 18px 14px 22px; }
+            .question-text { font-size: 1.05rem; }
+            .option-btn { padding: 14px 16px; font-size: 0.9rem; }
+            .nav-buttons { flex-direction: column; }
+            .nav-btn { width: 100%; text-align: center; }
+            .score-display { width: 100%; }
+            .back-btn, .share-btn { display: block; width: 100%; text-align: center; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="main-title">✨ Starlight 7</div>
+        <div class="main-subtitle">Module 1 • Revision Test</div>        <div class="modules-grid" id="modulesGrid">
+            <div class="module-card" onclick="openModule('module1')">
+                <div class="module-card-image" style="background:linear-gradient(135deg, #1a1a3e, #2d1b69, #4a1a6b);">
+                    <div class="module-card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:72px;height:72px;">
+                            <circle cx="50" cy="50" r="40" fill="#ff6b6b"/>
+                            <text x="50" y="65" text-anchor="middle" font-size="36" font-weight="bold" fill="white">1</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-card-body">
+                    <div class="module-card-title">Module 1</div>
+                    <div class="module-card-subtitle">50 questions</div>
+                    <button class="module-card-btn">Start</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-mode" id="testMode">
+            <div>
+                <button class="back-btn" onclick="goHome()">← Back to modules</button>
+                <button class="share-btn" onclick="shareResults()">📤 Share Results</button>
+            </div>
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title" id="testTitle">Module 1 — Work & Play</div>
+                    <div class="question-counter" id="questionCounter">1 / 50</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:2%;"></div></div>
+                <div id="questionTypeBadge"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options-list" id="optionsList"></div>
+                <div class="input-area" id="inputArea" style="display:none;">
+                    <input type="text" id="inputField" placeholder="Type your answer...">
+                    <button class="check-btn" id="checkBtn" onclick="checkInput()">Check</button>
+                    <div class="input-feedback" id="inputFeedback"></div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-btn btn-prev" id="prevBtn" onclick="prevQuestion()">← Back</button>
+                    <span class="score-display" id="scoreDisplay">Score: 0</span>
+                    <button class="nav-btn btn-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">Starlight 7 · Module 1 · Grammar & Vocabulary Revision</div>    <script>
+        // ==================== ЗВУКИ ====================
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+        function playPopSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = 800; osc.type = 'sine';
+                gain.gain.value = 0.12;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+        }
+        function playCorrectSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(523, ctx.currentTime);
+                osc.frequency.setValueAtTime(659, ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, ctx.currentTime + 0.16);
+                osc.type = 'sine'; gain.gain.value = 0.1;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+        function playWrongSound() {
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                osc.frequency.setValueAtTime(300, ctx.currentTime + 0.1);
+                osc.type = 'sawtooth'; gain.gain.value = 0.08;
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.25);
+            } catch(e) {}
+        }
+
+        // ==================== ФУНКЦИИ ====================
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        function prepareOptions(q) {
+            if (q.type !== 'option') return q;
+            const shuffled = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+            shuffleArray(shuffled);
+            const newOptions = shuffled.map(item => item.text);
+            const newCorrect = shuffled.findIndex(item => item.originalIndex === q.correct);
+            return { ...q, options: newOptions, correct: newCorrect };
+        }
+
+        // ==================== ВСЕ ВОПРОСЫ (Module 1) ====================
+        const allQuestions = {
+            module1: [
+                // ============ OPTION (кнопки) — 25 вопросов ============
+                { type: "option", text: "A firefighter has to be ...; they do dangerous things at work.", options: ["brave", "creative", "caring"], correct: 0 },
+                { type: "option", text: "A nurse has to be ...; they look after sick people.", options: ["organised", "caring", "polite"], correct: 1 },
+                { type: "option", text: "An artist has to be ...; they need to develop original ideas.", options: ["brave", "patient", "creative"], correct: 2 },
+                { type: "option", text: "A shop assistant has to be ...; they deal with people from different backgrounds.", options: ["polite", "creative", "brave"], correct: 0 },
+                { type: "option", text: "Smokejumpers are ... firefighters.", options: ["elite", "boring", "easy"], correct: 0 },
+                { type: "option", text: "They ... out of aeroplanes into burning forests.", options: ["parachute", "drive", "walk"], correct: 0 },
+                { type: "option", text: "Nick Porter is ... by the possibility of life on other planets.", options: ["fascinated", "bored", "tired"], correct: 0 },
+                { type: "option", text: "His UFO club mostly ... sightings.", options: ["investigates", "ignores", "creates"], correct: 0 },
+                { type: "option", text: "They interview ... and analyse videos.", options: ["witnesses", "criminals", "teachers"], correct: 0 },
+                { type: "option", text: "You need to be enthusiastic and ... to hunt UFOs.", options: ["patient", "angry", "lazy"], correct: 0 },
+                { type: "option", text: "Sara Campbell is a world ... freediver.", options: ["champion", "beginner", "teacher"], correct: 0 },
+                { type: "option", text: "She doesn't have an air tank, just a wetsuit, goggles and a ... .", options: ["monofin", "helmet", "raincoat"], correct: 0 },
+                { type: "option", text: "He always tells the truth. He is very ... .", options: ["honest", "brave", "creative"], correct: 0 },
+                { type: "option", text: "Sara feels completely ... underwater.", options: ["comfortable", "scared", "cold"], correct: 0 },
+                { type: "option", text: "It's totally ... underwater. There is no noise at all.", options: ["silent", "noisy", "loud"], correct: 0 },
+                { type: "option", text: "You can make a ... in the world by working for a charity.", options: ["difference", "mistake", "noise"], correct: 0 },
+                { type: "option", text: "Volunteers ... turtles and protect their eggs.", options: ["monitor", "cook", "eat"], correct: 0 },
+                { type: "option", text: "He's looking forward ... his new job.", options: ["to starting", "to start", "starting"], correct: 0 },
+                { type: "option", text: "I'd love ... a course on interior design.", options: ["to do", "doing", "do"], correct: 0 },
+                { type: "option", text: "He loves ... with kids.", options: ["working", "to work", "work"], correct: 0 },
+                { type: "option", text: "It's getting difficult ... a job nowadays.", options: ["to find", "finding", "find"], correct: 0 },
+                { type: "option", text: "They didn't let her ... out.", options: ["go", "to go", "going"], correct: 0 },
+                { type: "option", text: "He isn't used ... long hours.", options: ["to working", "to work", "work"], correct: 0 },
+                { type: "option", text: "The machines at the factory often ... .", options: ["break down", "break up", "break in"], correct: 0 },
+                { type: "option", text: "Michael's grandparents ... on a farm.", options: ["brought up him", "brought him up", "brought him about"], correct: 1 },
+
+                // ============ INPUT (полное предложение) — 25 вопросов ============
+                { type: "input", text: "He is very ... ; he always tells the truth. (HONEST)", correctAnswers: ["honest"] },
+                { type: "input", text: "A ... has to be patient; they need to stay calm. (TEACH)", correctAnswers: ["teacher"] },
+                { type: "input", text: "It takes a great ... to make a great film. (DIRECT)", correctAnswers: ["director"] },
+                { type: "input", text: "A ... can learn a lot about the country they stay in. (TOUR)", correctAnswers: ["tourist"] },
+                { type: "input", text: "An ... should always be pleasant, polite and well-prepared. (INTERVIEW)", correctAnswers: ["interviewer"] },
+                { type: "input", text: "The flight ... asked everyone to stay in their seats. (ATTEND)", correctAnswers: ["attendant"] },
+                { type: "input", text: "Sue is paying an interior ... to decorate her new flat. (DESIGN)", correctAnswers: ["designer"] },
+                { type: "input", text: "The ... is fixing the light in the dining room. (ELECTRIC)", correctAnswers: ["electrician"] },
+                { type: "input", text: "Smokejumpers have to train very ... (HARD).", correctAnswers: ["hard"] },
+                { type: "input", text: "They use aeroplanes to get to the fire ... (QUICK).", correctAnswers: ["quickly"] },
+                { type: "input", text: "Zach smiles ... (HAPPY) when he talks about his job.", correctAnswers: ["happily"] },
+                { type: "input", text: "They fought the dangerous fire ... (BRAVE).", correctAnswers: ["bravely"] },
+                { type: "input", text: "Smokejumpers know the forest very ... (GOOD).", correctAnswers: ["well"] },
+                { type: "input", text: "The men check the area ... (CAREFUL) for fires.", correctAnswers: ["carefully"] },
+                { type: "input", text: "Nick usually ... (GO) UFO hunting at the weekend.", correctAnswers: ["goes"] },
+                { type: "input", text: "Right now he ... (WATCH) the sky.", correctAnswers: ["is watching"] },
+                { type: "input", text: "Look! He ... (INTERVIEW) a witness.", correctAnswers: ["is interviewing"] },
+                { type: "input", text: "I ... (THINK) it's a UFO.", correctAnswers: ["think"] },
+                { type: "input", text: "I ... (THINK) of joining a UFO club.", correctAnswers: ["am thinking"] },
+                { type: "input", text: "He ... (HAVE) a telescope.", correctAnswers: ["has"] },
+                { type: "input", text: "He ... (HAVE) a look at the sky now.", correctAnswers: ["is having"] },
+                { type: "input", text: "Being a firefighter is ... (DANGEROUS) than being a taxi driver.", correctAnswers: ["more dangerous"] },
+                { type: "input", text: "Smokejumpers are ... (BRAVE) people I know.", correctAnswers: ["the bravest"] },
+                { type: "input", text: "This job is ... (TOUGH) than I expected.", correctAnswers: ["tougher"] },
+                { type: "input", text: "She is ... (GOOD) nurse in the hospital.", correctAnswers: ["the best"] }
+            ]
+        };        // ==================== СОСТОЯНИЕ ====================
+        let currentModule = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let checkedQuestions = {};
+        let totalQuestions = 0;
+        let moduleStartTime = null;
+        let moduleEndTime = null;
+
+        function goHome() {
+            document.getElementById('modulesGrid').classList.remove('hidden');
+            document.getElementById('testMode').classList.remove('active');
+            if (currentModule) moduleEndTime = Date.now();
+            currentModule = null;
+            currentQuestionIndex = 0;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openModule(moduleName) {
+            playPopSound();
+            currentModule = moduleName;
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            checkedQuestions = {};
+            moduleStartTime = Date.now();
+            moduleEndTime = null;
+
+            let questions = allQuestions[moduleName];
+            if (!questions || questions.length === 0) {
+                alert('Questions for this module are coming soon!');
+                return;
+            }
+
+            const shuffled = shuffleArray([...questions]).map(q => {
+                if (q.type === 'option') return prepareOptions(q);
+                return { ...q };
+            });
+            allQuestions[moduleName] = shuffled;
+
+            totalQuestions = shuffled.length;
+            document.getElementById('modulesGrid').classList.add('hidden');
+            document.getElementById('testMode').classList.add('active');
+            document.getElementById('testTitle').textContent = 'Module 1 — Work & Play';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderQuestion();
+        }
+
+        function getAnswerKey() {
+            return currentModule + '_' + currentQuestionIndex;
+        }
+
+        function renderQuestion() {
+            const questions = allQuestions[currentModule];
+            if (!questions || currentQuestionIndex >= questions.length) return;
+            const q = questions[currentQuestionIndex];
+            const key = getAnswerKey();
+            const status = checkedQuestions[key];
+
+            document.getElementById('questionText').textContent = q.text;
+            document.getElementById('questionCounter').textContent = (currentQuestionIndex + 1) + ' / ' + totalQuestions;
+            document.getElementById('progressFill').style.width = ((currentQuestionIndex + 1) / totalQuestions * 100) + '%';
+
+            const badge = document.getElementById('questionTypeBadge');
+            if (q.type === 'option') {
+                badge.innerHTML = '<span class="question-type-badge badge-option">Multiple Choice</span>';
+            } else {
+                badge.innerHTML = '<span class="question-type-badge badge-input">Fill in</span>';
+            }
+
+            const optionsList = document.getElementById('optionsList');
+            const inputArea = document.getElementById('inputArea');
+
+            optionsList.style.display = 'none';
+            inputArea.style.display = 'none';
+
+            if (q.type === 'option') {
+                optionsList.style.display = 'flex';
+                optionsList.innerHTML = '';
+                q.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt;
+                    if (status !== undefined) {
+                        btn.classList.add('disabled');
+                        if (index === q.correct) btn.classList.add('correct');
+                        if (userAnswers[key] === index && status === 'wrong') btn.classList.add('wrong');
+                    }
+                    btn.addEventListener('click', function() {
+                        if (checkedQuestions[key] !== undefined) return;
+                        userAnswers[key] = index;
+                        if (index === q.correct) {
+                            checkedQuestions[key] = 'correct';
+                            playCorrectSound();
+                        } else {
+                            checkedQuestions[key] = 'wrong';
+                            playWrongSound();
+                        }
+                        renderQuestion();
+                    });
+                    optionsList.appendChild(btn);
+                });
+            } else if (q.type === 'input') {
+                inputArea.style.display = 'flex';
+                const inputField = document.getElementById('inputField');
+                const checkBtn = document.getElementById('checkBtn');
+                const feedback = document.getElementById('inputFeedback');
+
+                if (status !== undefined) {
+                    inputField.value = userAnswers[key] || '';
+                    inputField.disabled = true;
+                    checkBtn.disabled = true;
+                    if (status === 'correct') {
+                        inputField.className = 'correct-input';
+                        feedback.className = 'input-feedback correct-feedback';
+                        feedback.textContent = '✅ Correct!';
+                    } else {
+                        inputField.className = 'wrong-input';
+                        feedback.className = 'input-feedback wrong-feedback';
+                        feedback.textContent = '❌ Wrong. Correct answer: ' + q.correctAnswers[0];
+                    }
+                } else {
+                    inputField.value = '';
+                    inputField.disabled = false;
+                    inputField.className = '';
+                    checkBtn.disabled = false;
+                    feedback.textContent = '';
+                    feedback.className = 'input-feedback';
+                    inputField.focus();
+                }
+            }
+
+            document.getElementById('prevBtn').disabled = (currentQuestionIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentQuestionIndex >= totalQuestions - 1);
+            updateScore();
+        }
+
+        function normalizeAnswer(str) {
+            return str.trim().toLowerCase().replace(/[.!?,;:—–-]/g, '').replace(/\s+/g, ' ');
+        }
+
+        function checkInput() {
+            const q = allQuestions[currentModule][currentQuestionIndex];
+            const key = getAnswerKey();
+            if (checkedQuestions[key] !== undefined) return;
+
+            const inputField = document.getElementById('inputField');
+            const feedback = document.getElementById('inputFeedback');
+            const userAnswer = inputField.value.trim();
+
+            const normalizedUser = normalizeAnswer(userAnswer);
+            const isCorrect = q.correctAnswers.some(ans => normalizeAnswer(ans) === normalizedUser);
+
+            userAnswers[key] = userAnswer;
+            if (isCorrect) {
+                checkedQuestions[key] = 'correct';
+                inputField.className = 'correct-input';
+                feedback.className = 'input-feedback correct-feedback';
+                feedback.textContent = '✅ Correct!';
+                playCorrectSound();
+            } else {
+                checkedQuestions[key] = 'wrong';
+                inputField.className = 'wrong-input';
+                feedback.className = 'input-feedback wrong-feedback';
+                feedback.textContent = '❌ Wrong. Correct answer: ' + q.correctAnswers[0];
+                playWrongSound();
+            }
+            inputField.disabled = true;
+            document.getElementById('checkBtn').disabled = true;
+            updateScore();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function updateScore() {
+            let correctCount = 0;
+            const questions = allQuestions[currentModule];
+            if (!questions) return;
+            for (let i = 0; i < questions.length; i++) {
+                const key = currentModule + '_' + i;
+                if (checkedQuestions[key] === 'correct') correctCount++;
+            }
+            document.getElementById('scoreDisplay').textContent = 'Score: ' + correctCount;
+        }
+
+        function shareResults() {
+            const questions = allQuestions[currentModule];
+            if (!questions) return;
+
+            let correctCount = 0;
+            const mistakes = [];
+            for (let i = 0; i < questions.length; i++) {
+                const key = currentModule + '_' + i;
+                if (checkedQuestions[key] === 'correct') {
+                    correctCount++;
+                } else if (checkedQuestions[key] === 'wrong') {
+                    const q = questions[i];
+                    const userAns = userAnswers[key] || '(no answer)';
+                    let correctAns = '';
+                    if (q.type === 'option') correctAns = q.options[q.correct];
+                    else if (q.type === 'input') correctAns = q.correctAnswers[0];
+                    mistakes.push({ number: i + 1, text: q.text, userAnswer: userAns, correctAnswer: correctAns });
+                }
+            }
+
+            const total = questions.length;
+            const percent = Math.round((correctCount / total) * 100);
+            const endTime = moduleEndTime || Date.now();
+            const timeSpent = Math.floor((endTime - moduleStartTime) / 1000);
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+
+            let report = '📊 Starlight 7 — Module 1 — Work & Play\n';
+            report += '✅ Score: ' + correctCount + ' / ' + total + ' (' + percent + '%)\n';
+            report += '⏱️ Time: ' + minutes + ' min ' + seconds + ' sec\n\n';
+
+            if (mistakes.length > 0) {
+                report += '❌ Mistakes:\n';
+                mistakes.forEach(m => {
+                    report += m.number + '. ' + m.text + ' → Correct: ' + m.correctAnswer + '\n';
+                });
+            } else {
+                report += '🎉 Perfect! No mistakes!';
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(report).then(() => {
+                    alert('✅ Results copied to clipboard!\n\nShare them with your teacher.');
+                }).catch(() => fallbackShare(report));
+            } else {
+                fallbackShare(report);
+            }
+        }
+
+        function fallbackShare(report) {
+            const textarea = document.createElement('textarea');
+            textarea.value = report;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('✅ Results copied to clipboard!\n\nShare them with your teacher.');
+            } catch(e) {
+                prompt('Copy this text and share it:', report);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ==================== КЛАВИШИ ====================
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('testMode').classList.contains('active')) {
+                if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); }
+            }
+            if (e.key === 'Enter') {
+                const inputArea = document.getElementById('inputArea');
+                if (inputArea.style.display !== 'none') {
+                    const checkBtn = document.getElementById('checkBtn');
+                    if (!checkBtn.disabled) checkInput();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
